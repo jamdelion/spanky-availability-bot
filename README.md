@@ -16,3 +16,13 @@
 `<ngrok URL>/slack/commands`
 
 4. Install in workspace and invoke with `/availablity <string>`
+
+
+### Useful resources
+
+- https://github.com/fac21/final-project-telegran/blob/main/server/api/sendToSlack.js
+- https://glitch.com/edit/#!/victorious-colossal-hamburger?path=server.js%3A242%3A0
+- https://api.slack.com/interactivity/slash-commands
+- https://github.com/slackapi/sample-message-menus-node
+- https://github.com/slackapi/node-slack-sdk
+- https://api.slack.com/reference/block-kit/block-elements#button
