@@ -23,30 +23,29 @@ if (!slackVerificationToken || !slackAccessToken) {
   );
 }
 
+const userIds = {
+  JO: process.env.JO_USER_ID,
+  FINGAL: process.env.FINGAL_USER_ID,
+}
+
 // can define body parser twice, one each for urlencoded and json
 // e.g.
 // app.use(bodyParser.urlencoded({ extended: true }));
 // app.use(bodyParser.json());
 
-// server.post(bodyParser.urlencoded({ extended: false }), slackSlashCommand);
 server.use("/slack/actions", slackInteractions.expressMiddleware());
-
-server.get("/", (req, res) => {
-  res.send("<h1>Server is running</h1>");
-});
 
 // Attach the slash command handler
 server.post("/slack/commands", bodyParser.urlencoded({extended: false}), slackSlashCommand);
 
-function slackSlashCommand(req, res, next) {
-  console.log("in slackSlashCommand");
+async function slackSlashCommand(req, res, next) {
   console.log("req.body", req.body);
   console.log("res.body", res.req.body);
   if (
     req.body.token === slackVerificationToken &&
     req.body.command === "/availability"
   ) {
-    res.json({ ...interactiveButtons, text: req.body.text });
+    askQuestion("Jo", req)
   } else {
     next();
   }
@@ -54,8 +53,6 @@ function slackSlashCommand(req, res, next) {
 
 // test that the slack bot can listen at the events endpoint
 server.post("/events", bodyParser.json(), (req, res) => {
-  console.log("req events", req.body)
-  console.log("res events", res.body)
   res.send(req.body.challenge);
 });
 
@@ -87,6 +84,31 @@ slackInteractions.action("availability", (payload, respond) => {
   }
 });
 
+async function askQuestion(userToAsk, request) {
+
+  userToAsk = userToAsk.toUpperCase();
+  let userId;
+
+  if (userToAsk in userIds) {
+    userId = userIds[userToAsk];
+  } else {
+    return;
+  }
+
+  try {
+    const result = await client.chat.postMessage({
+      token: slackAccessToken,
+      channel: userId,
+      text: request.body.text,
+      ...interactiveButtons
+    });
+    console.log(result);
+  }
+  catch (error) {
+    console.error(error);
+  }
+}
+
 async function tellJo(person, gig, answer) {
 
   // This is the same as:
@@ -101,7 +123,7 @@ async function tellJo(person, gig, answer) {
   try {
     const result = await client.chat.postMessage({
       token: slackAccessToken,
-      channel: 'U0257P9V8TH', // Jo's member id
+      channel: process.env.JO_USER_ID,
       text: `For ${gig}, ${person}'s answer is ${answer}`
     });
     console.log(result);
