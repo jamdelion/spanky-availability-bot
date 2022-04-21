@@ -23,6 +23,11 @@ if (!slackVerificationToken || !slackAccessToken) {
   );
 }
 
+// can define body parser twice, one each for urlencoded and json
+// e.g.
+// app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(bodyParser.json());
+
 // server.post(bodyParser.urlencoded({ extended: false }), slackSlashCommand);
 server.use("/slack/actions", slackInteractions.expressMiddleware());
 
@@ -46,6 +51,14 @@ function slackSlashCommand(req, res, next) {
     next();
   }
 }
+
+// test that the slack bot can listen at the events endpoint
+server.post("/events", bodyParser.json(), (req, res) => {
+  console.log("req events", req.body)
+  console.log("res events", res.body)
+  res.send(req.body.challenge);
+});
+
 
 // Handle interactions from messages with a `callback_id` of `availability`
 slackInteractions.action("availability", (payload, respond) => {
