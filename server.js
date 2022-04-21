@@ -23,7 +23,7 @@ if (!slackVerificationToken || !slackAccessToken) {
   );
 }
 
-server.use(bodyParser.urlencoded({ extended: false }));
+// server.post(bodyParser.urlencoded({ extended: false }), slackSlashCommand);
 server.use("/slack/actions", slackInteractions.expressMiddleware());
 
 server.get("/", (req, res) => {
@@ -31,47 +31,42 @@ server.get("/", (req, res) => {
 });
 
 // Attach the slash command handler
-server.post("/slack/commands", slackSlashCommand);
-
-// Handle interactions from messages with a `callback_id` of `welcome_button`
-slackInteractions.action("welcome_button", (payload, respond) => {
-  // `payload` contains information about the action
-  // see: https://api.slack.com/docs/interactive-message-field-guide#action_url_invocation_payload
-  console.log(payload);
-
-  // `respond` is a function that can be used to follow up on the action with a message
-  respond({
-    text: "Success!",
-  });
-
-  // The return value is used to update the message where the action occurred immediately.
-  // Use this to items like buttons and menus that you only want a user to interact with once.
-  return {
-    text: "Processing...",
-  };
-});
+server.post("/slack/commands", bodyParser.urlencoded({extended: false}), slackSlashCommand);
 
 function slackSlashCommand(req, res, next) {
   console.log("in slackSlashCommand");
   console.log("req.body", req.body);
   console.log("res.body", res.req.body);
-  console.log("slackVet", slackVerificationToken);
-  console.log("res body token", req.body.token);
-  console.log("equal", req.body.token === slackVerificationToken);
   if (
     req.body.token === slackVerificationToken &&
     req.body.command === "/availability"
   ) {
-    console.log("about to do res.json");
     res.json({ ...interactiveButtons, text: req.body.text });
   } else {
     next();
   }
 }
 
+// Handle interactions from messages with a `callback_id` of `availability`
 slackInteractions.action("availability", (payload, respond) => {
-  console.log("payload", payload);
-  console.log("respond", respond);
+  switch (payload.actions[0].value) {
+    case 'available':
+      console.log("payload", payload);
+      return "Excellent, see you there!"
+      break;
+    case 'busy':
+      console.log("payload", payload);
+      return "Ok, thanks for letting me know."
+      break;
+    case 'maybe':
+      console.log("payload", payload);
+      // remind Jo to ask {payload.user.name} again next week
+      // store "maybe" value against {payload.user.name} for {payload.original_message.text}
+      return "Ok, I'll ask you again next week."
+      break;
+    default:
+      console.log(`Went to default option`);
+  }
 });
 
 server.listen(PORT, () => {
