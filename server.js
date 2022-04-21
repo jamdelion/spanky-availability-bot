@@ -49,25 +49,54 @@ function slackSlashCommand(req, res, next) {
 
 // Handle interactions from messages with a `callback_id` of `availability`
 slackInteractions.action("availability", (payload, respond) => {
-  switch (payload.actions[0].value) {
+
+  console.log("payload", payload);
+
+  const user = payload.user.name;
+  const gig = payload.original_message.text;
+  const availability = payload.actions[0].value;
+
+  tellJo(user, gig, availability);
+
+  switch (availability) {
     case 'available':
-      console.log("payload", payload);
       return "Excellent, see you there!"
       break;
     case 'busy':
-      console.log("payload", payload);
       return "Ok, thanks for letting me know."
       break;
     case 'maybe':
-      console.log("payload", payload);
       // remind Jo to ask {payload.user.name} again next week
-      // store "maybe" value against {payload.user.name} for {payload.original_message.text}
       return "Ok, I'll ask you again next week."
       break;
     default:
       console.log(`Went to default option`);
   }
 });
+
+async function tellJo(person, gig, answer) {
+
+  // This is the same as:
+  //   POST https://slack.com/api/chat.postMessage
+  // Content-type: application/json
+  // Authorization: Bearer xoxb-your-token
+  // {
+  //   "channel": "YOUR_CHANNEL_ID",
+  //   "text": "Hello world :tada:"
+  // }
+
+  try {
+    const result = await client.chat.postMessage({
+      token: slackAccessToken,
+      channel: 'U0257P9V8TH', // Jo's member id
+      text: `For ${gig}, ${person}'s answer is ${answer}`
+    });
+    console.log(result);
+  }
+  catch (error) {
+    console.error(error);
+  }
+}
 
 server.listen(PORT, () => {
   console.log(`Listening on http://localhost:${PORT}`);
