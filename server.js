@@ -45,6 +45,7 @@ async function slackSlashCommand(req, res, next) {
     req.body.token === slackVerificationToken &&
     req.body.command === "/availability"
   ) {
+    getOrgUsers();
     askQuestion("Jo", req)
   } else {
     next();
@@ -84,6 +85,19 @@ slackInteractions.action("availability", (payload, respond) => {
   }
 });
 
+async function getOrgUsers() {
+  try {
+    const result = await client.users.list({
+      token: slackAccessToken
+    });
+    console.log("Users: ", result.members);
+    return result.members;
+  }
+  catch (error) {
+    console.error(error);
+  }
+}
+
 async function askQuestion(userToAsk, request) {
 
   userToAsk = userToAsk.toUpperCase();
@@ -99,8 +113,8 @@ async function askQuestion(userToAsk, request) {
     const result = await client.chat.postMessage({
       token: slackAccessToken,
       channel: userId,
-      text: request.body.text,
-      ...interactiveButtons
+      ...interactiveButtons,
+      text: request.body.text
     });
     console.log(result);
   }
