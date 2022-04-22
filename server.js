@@ -23,11 +23,6 @@ if (!slackVerificationToken || !slackAccessToken) {
   );
 }
 
-const userIds = {
-  JO: process.env.JO_USER_ID,
-  FINGAL: process.env.FINGAL_USER_ID,
-}
-
 // can define body parser twice, one each for urlencoded and json
 // e.g.
 // app.use(bodyParser.urlencoded({ extended: true }));
