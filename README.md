@@ -15,9 +15,13 @@
 - Slash commands Request URL:
 `<ngrok URL>/slack/commands`
 
-4. Install in workspace and invoke with `/availablity <string>`
+4. Install in workspace and invoke with `/availablity <@user> for <string>`
 
+### Stretch tasks
 
+- [ ] Send Jo an automatic reminder to re-ask people who said maybe
+- [ ] Find a way to have this permanently running
+- [ ] Ask multiple people with one command
 ### Useful resources
 
 - https://github.com/fac21/final-project-telegran/blob/main/server/api/sendToSlack.js
