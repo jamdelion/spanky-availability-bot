@@ -45,11 +45,18 @@ async function slackSlashCommand(req, res, next) {
     req.body.token === slackVerificationToken &&
     req.body.command === "/availability"
   ) {
-    getOrgUsers();
-    askQuestion("Jo", req)
+    const {userToAsk, gigDetails} = parseSlashCommand(req.body.text)
+    askQuestion(userToAsk, gigDetails)
+    res.send(gigDetails) // send confirmation to user who called command
   } else {
     next();
   }
+}
+
+function parseSlashCommand(commandText) {
+  // split into an array containing the username and gig details string
+  const [userToAsk, gigDetails] = commandText.split("for").map(x => x.trim());
+  return {userToAsk, gigDetails}
 }
 
 // test that the slack bot can listen at the events endpoint
@@ -90,33 +97,36 @@ async function getOrgUsers() {
     const result = await client.users.list({
       token: slackAccessToken
     });
-    console.log("Users: ", result.members);
-    return result.members;
+    return result.members.map(user => pick(user, 'id', 'name', 'real_name'));
   }
   catch (error) {
     console.error(error);
   }
 }
 
-async function askQuestion(userToAsk, request) {
+const pick = (obj, ...keys) => Object.fromEntries(
+  keys
+  .filter(key => key in obj)
+  .map(key => [key, obj[key]])
+);
 
-  userToAsk = userToAsk.toUpperCase();
-  let userId;
 
-  if (userToAsk in userIds) {
-    userId = userIds[userToAsk];
-  } else {
-    return;
-  }
+// The slack bot opens a DM with the specified user to ask for their availability
+async function askQuestion(userToAsk, gigDetails) {
+
+  const userList = await getOrgUsers();
+
+  const normalisedName = userToAsk.replace("@", "");
+
+  const newUserToAsk = userList.filter(user => user.name === normalisedName);
 
   try {
     const result = await client.chat.postMessage({
       token: slackAccessToken,
-      channel: userId,
+      channel: newUserToAsk[0].id,
       ...interactiveButtons,
-      text: request.body.text
+      text: gigDetails
     });
-    console.log(result);
   }
   catch (error) {
     console.error(error);
