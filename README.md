@@ -1,19 +1,25 @@
 # Spanky Slack bot
 
+<img src="https://user-images.githubusercontent.com/31373245/164750318-a438fbe0-1eb7-4cf4-abf8-d17b6774c2c7.png" width="300" />
+
 ### How to use
 
-1. Configure a slack app and opulate the .env (see .env.example) with the tokens.
+1. Configure a slack app and populate the .env (see .env.example) with the tokens.
 
 2. `npm install` and run the server (`node server.js`)
 
-3. Run ngrok (`./ngrok http 3000`) in a separate terminal, and use the forwarding URL in the the interactivity and slash commands settings of the slack app:
+3. Run ngrok (`./ngrok http 3000`) in a separate terminal, and use the forwarding URL in the the interactivity, events subscription and slash commands settings of the slack app:
+
+E.g. 
 
 - Request URL and Options Load URL:
 `<ngrok URL>/slack/actions`
 
-
 - Slash commands Request URL:
 `<ngrok URL>/slack/commands`
+
+- Event subscriptions URL:
+`<ngrok URL>/events`
 
 4. Install in workspace and invoke with `/availablity <@user> for <string>`
 
