@@ -39,8 +39,6 @@ server.use("/slack/actions", slackInteractions.expressMiddleware());
 server.post("/slack/commands", bodyParser.urlencoded({extended: false}), slackSlashCommand);
 
 async function slackSlashCommand(req, res, next) {
-  console.log("req.body", req.body);
-  console.log("res.body", res.req.body);
   if (
     req.body.token === slackVerificationToken &&
     req.body.command === "/availability"
@@ -68,8 +66,6 @@ server.post("/events", bodyParser.json(), (req, res) => {
 // Handle interactions from messages with a `callback_id` of `availability`
 slackInteractions.action("availability", (payload, respond) => {
 
-  console.log("payload", payload);
-
   const user = payload.user.name;
   const gig = payload.original_message.text;
   const availability = payload.actions[0].value;
@@ -78,14 +74,14 @@ slackInteractions.action("availability", (payload, respond) => {
 
   switch (availability) {
     case 'available':
-      return "Excellent, see you there!"
+      return `:star: Excellent, you've said you're available for "${gig}". Thanks for replying, and see you there! :guitar: :saxophone:`
       break;
     case 'busy':
-      return "Ok, thanks for letting me know."
+      return `Ok, you've said you're not available for "${gig}". Thanks for letting me know. :+1:`
       break;
     case 'maybe':
       // remind Jo to ask {payload.user.name} again next week
-      return "Ok, I'll ask you again next week."
+      return `You've said "maybe" for "${gig}". I'll ask you again next week. :arrows_counterclockwise:`
       break;
     default:
       console.log(`Went to default option`);
@@ -150,7 +146,6 @@ async function tellJo(person, gig, answer) {
       channel: process.env.JO_USER_ID,
       text: `For ${gig}, ${person}'s answer is ${answer}`
     });
-    console.log(result);
   }
   catch (error) {
     console.error(error);
