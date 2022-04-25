@@ -26,7 +26,7 @@ E.g.
 ### Stretch tasks
 
 - [ ] Send Jo an automatic reminder to re-ask people who said maybe
-- [ ] Find a way to have this permanently running
+- [X] Find a way to have this permanently running (now on Heroku)
 - [ ] Ask multiple people with one command
 ### Useful resources
 
